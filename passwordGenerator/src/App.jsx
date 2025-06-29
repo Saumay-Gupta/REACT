@@ -1,78 +1,57 @@
-import { useCallback, useState , useEffect, useRef} from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 function App() {
-  const [length, setLength] = useState(8)
-  const [numberAllowed, setNumberAllowed] = useState(false);
-  const [characterAllowed, setCharacterAllowed] = useState(false);
-  const [password, setPassword] = useState("");
+  const [pass,setPass] = useState("");
+  const [passLength, setPassLength] = useState(8);
+  const [numbers,setNumbers] = useState(false);
+  const [characters,setCharacters] = useState(false);
 
-  const passwordRef = useRef(null)
+  const passRef = useRef(null)
 
-  const passwordGenerator = useCallback(
-    ()=>{
-      let pass = ""
-      let str = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  useEffect(()=>{
+    let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    const digits = "1234567890"
+    const symbols = "!@#$%^&*<>?"
+    let password = "";
 
-      if(numberAllowed) str += "1234567890"
-      
-      if(characterAllowed) str += "!@#$%^&*"
+    if(numbers) letters+= digits;
+    if(characters) letters+= symbols;
 
-      for(let i = 0;i<length;i++){
-        let char = Math.floor(Math.random() * str.length + 1)
-
-        pass += str.charAt(char)
-      }
-
-      setPassword(pass)
+    for(let i = 0;i<passLength;i++){
+      const c = Math.round(Math.random() * letters.length + 1)
+      password += letters.charAt(c)
     }
-    ,
-    [length,numberAllowed,characterAllowed,setPassword]
-  )
 
-  useEffect(
-    ()=>{
-      passwordGenerator()
-    }
-    ,
-    [length,numberAllowed,characterAllowed,passwordGenerator]
-  )
+    setPass(password)
 
-  const copyPasswordToClipboard = useCallback(
-    ()=>{
-      passwordRef.current?.select()
-      window.navigator.clipboard.writeText(password)
-    }
-    ,
-    [password]
-  )
+  },[passLength,numbers,characters])
+
+  const copyPassword = () => {
+    passRef.current?.select()
+    window.navigator.clipboard.writeText(pass)
+  }
   return (
     <>
-      <div className='w-full h-screen flex justify-center' style={{backgroundColor: "#1b1919"}}>
-        <div className='h-1/4 w-1/3 bg-gray-600 my-20'>
-          <h1 className='text-white text-center my-5 text-2xl'>Password Generator</h1>
+      <div className='bg-black flex flex-col items-center h-screen w-full'> 
+        <h1 className='text-white font-bold text-2xl mt-10'>Password Generator</h1>
+        <div className='bg-[#434040] flex flex-col h-40 w-120 mt-10 rounded'>
+          <div className='flex flex-row mt-7 mx-auto'>
+            <input type="text" value={pass} className='bg-white w-90 rounded h-8 p-2'/>
+            <button className='bg-blue-500 rounded text-white ml-3 w-15' onClick={copyPassword}>
+             COPY </button>
+          </div>
+          <div className='flex flex-row mx-auto mt-10'>
+              <input type="range" value={passLength} onChange={(e)=>setPassLength(e.target.value)}/>
+              <span className='mx-2'>{passLength}</span>
 
-            <input type="text" value={password} className='bg-white mx-3 w-90' readOnly ref={passwordRef}/>
-            <button className='text-white bg-blue-500 px-4 py-0.9' onClick={copyPasswordToClipboard}>Copy</button>
+              <input type="checkbox" value={numbers} onChange={(e)=> setNumbers(!numbers)} className='ml-5'/>
+              <span className='mx-2'>Numbers</span>
 
-            <br />
-
-            <input type="range" className='mx-3 my-6 cursor-pointer' value={length} min={6} max={50} 
-            onChange={(e) => setLength(e.target.value)}/>
-            <label className='text-white'>({length})</label>
-
-            <input type="checkbox" className='ml-10 mr-1' 
-            id="numberAllowed" defaultChecked={numberAllowed}
-            onChange={(prev)=> setNumberAllowed((prev) => !prev)}
-            />
-            <label className='text-white'>Numbers</label>
-
-            <input type="checkbox" className='ml-10 mr-1' 
-            id="characterAllowed" defaultChecked={characterAllowed}
-            onChange={(prev)=> setCharacterAllowed((prev) => !prev)}
-            />
-            <label className='text-white'>Characters</label>
-            </div>
+               <input type="checkbox" value={characters} onChange={(e)=> setCharacters(!characters)} className='ml-5'/>
+              <span className='mx-2'>Characters</span>
+          </div>
+        </div>
       </div>
     </>
   )
